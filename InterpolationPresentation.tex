@@ -1,0 +1,91 @@
+\documentclass{beamer}
+
+\usetheme{Copenhagen}
+
+\usecolortheme{dolphin}
+
+% PACKAGES ---------------------------------------------------------------
+
+\usepackage{amsfonts,amsmath,graphicx,subfigure}
+
+% ADD YOUR OWN PACKAGES HERE ---------------------------------------------
+
+%\usepackage{someotherpackage}
+
+\usepackage{lmodern,bbm}
+
+
+\newcommand{\STRR}{\mathbb{R}}
+
+\newcommand{\STRnorm}[1]{\left\Vert#1\right\Vert}
+
+\newcommand{\STRabs}[1]{\left\vert#1\right\vert}
+
+\newcommand{\STRset}[1]{\{#1\}}
+
+\newtheorem{prob}{Problem}
+
+\newtheorem{prop}{Proposition}
+
+\beamertemplatenavigationsymbolsempty % Get rid of the navigation menu
+
+%\newtheorem{lemma}{Lemma}
+
+\newtheorem{cor}{Corollary}
+
+\mode<presentation>
+
+{
+
+\setbeamertemplate{headline}{}
+
+\usecolortheme{default}
+
+}
+
+\title{Curve Fitting and Interpolation}
+
+\author{Stephen Rowe}
+
+
+\date{\today}
+
+
+\begin{document}
+
+ 
+
+\begin{frame}
+
+\titlepage
+
+\end{frame}
+ 
+
+
+\section{Why am I Here Listening to This?}
+\begin{frame}
+\frametitle{People Like Pictures}
+\begin{itemize}
+\item Let's say someone gives us some points $\{x_i\}_{i=1}^n$ and some corresponding values $\{y_i\}_{i=1}^N$.
+\item They ask us to "draw something that fits through the data points"
+\item They hope that they can then choose a new $x$ point and guess (meaningfully) a corresponding $y$ value.
+\item They might demand that the curve we draw passes through every single $(x_i,y_i)$ point.
+\item They might be a bit more lax and say ``do your best and try to approximate each $(x_i,y_i)$ point."
+\end{itemize}
+\end{frame}
+
+
+
+
+\end{document}
+
+\begin{frame}
+
+\frametitle{}
+
+\begin{itemize}
+
+\end{itemize}
+
+\end{frame}
