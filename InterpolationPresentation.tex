@@ -68,7 +68,7 @@
 \frametitle{People Like Pictures}
 \begin{itemize}
 \item Let's say someone gives us some points $\{x_i\}_{i=1}^n$ and some corresponding values $\{y_i\}_{i=1}^N$.
-\item They ask us to "draw something that fits through the data points"
+\item They ask us to "draw something that fits through the data points" 
 \item They hope that they can then choose a new $x$ point and guess (meaningfully) a corresponding $y$ value.
 \item They might demand that the curve we draw passes through every single $(x_i,y_i)$ point.
 \item They might be a bit more lax and say ``do your best and try to approximate each $(x_i,y_i)$ point."
@@ -76,8 +76,135 @@
 \end{frame}
 
 
+\begin{frame}
+\frametitle{Wow! How can I do that???}
+\begin{itemize}
+\item There are infinitely many ways to do this! We'll look at two major ways
+\item Polynomial Fitting
+\item Piecewise Polynomial Fitting
+\end{itemize}
+\end{frame}
 
+\begin{frame}
+\frametitle{Polynomial Interpolation in 1D}
+\begin{itemize}
+\item We have a bunch of data points $\STRset{x_i}_{i=1}^N$ and values $\STRset{y_i}_{i=1}^N$ where the $x_i$ and $y_i$ values are real numbers
+\item Goal: Find a polynomial $p(x) = a_0 + a_1 x + a_2 x^2 + ... a_{n-1}x^{n-1}$ such that $p(x_i) = y_i$.
+\item Mathy Theorem: Given distinct data points (i.e., $x_i \neq x_j$ for $i \neq j$), math guarantees you can find such a polynomial!
+\end{itemize}
+\end{frame}
 
+\begin{frame}
+\frametitle{No one cares about math. How do I computer it?}
+\begin{itemize}
+\item To solve this problem, we make a system of $N$ equations in $N$ unknowns. We want $a_0 + a_1 x_i + ... a_{n-1}x_i^{n-1} = y_i$ for $i=1,\dots, n$. 
+\item We see that this is $n$ equations in $n$ unknowns where the unknowns are the $a_k$ values. We matrix this problem:
+$A = \begin{pmatrix}
+1 & x_1 & ... & x_1^{n-1}\\
+1 & x_2 & ... & x_2^{n-1} \\
+\vdots & \vdots & ... & \vdots \\
+1 & x_i &... & x_i^{n-1} \\
+\vdots & \vdots & ... & \vdots \\
+1 & x_n & ... & x_n^{n-1}
+\end{pmatrix}$, $c = \begin{pmatrix} a_0 \\ a_1 \\ \vdots \\ a_{n-1} \end{pmatrix}$ and  $ 
+y = \begin{pmatrix}
+y_1 \\ y_2 \\ \vdots \\ y_n
+\end{pmatrix}
+$ 
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{We Matrix'd, now what?}
+\begin{itemize}
+\item We have problem $Ac = y$. We need to solve for $c$. Linear algebra says $c = A^{-1}y$
+\item By math, it is guaranteed that $A$ is always invertible, so we can always solve for $c$.
+\item $A$ is a so-called Vandermonde Matrix which has the special form where the columns are evaluations of monomials.
+\item $A$ is terrible. The \emph{condition number} of $A$ grows very, very quickly.
+\item The condition number gives an estimate on how inaccurate the resulting solution will be after some sort of approximation (such as the dreaded and unavoidable floating point errors or round-off errors).
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Things just get worse...}
+\begin{itemize}
+\item Not only is this wildly ill-conditioned (which means your solver will choke eventually), it also can lie to you.
+\item \emph{Runge's Phenomenon} is a peculiarity where the interpolating polynomial starts oscillating wildly between data points.
+\item Polynomials ``naturally'' oscillate, and they can behave particularly insidiously between data points or near the boundary.
+\item Python Example Time!
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{I'm going to ignore you and still use polynomials. How can I make them better?}
+\begin{itemize}
+\item Change your basis: Don't assume your basis functions are monomials ${1,x,x^2,..,x^{n-1}}$. 
+\item What if we had polynomial basis $\STRset{p_i(x)}_{i=1}^n$ such that for each data point $p_i(x_j) = \begin{cases} 1 \, i = j \\ 0 \, i \neq j \end{cases}$
+\item Then our interpolant $p(x) = y_1 p_1(x) + y_2 p_2(x) + ... y_n p_n(x)$. (Wow, no matrix solve step!) 
+
+\item This is called \emph{Lagrange Interpolation} and the polynomials have a closed form $$p_i(x) = \frac{ \Pi_{i \neq j} (x-x_j)}{\Pi_{j \neq i} (x_i -x_j) }$$.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Fixing Polynomials}
+\begin{itemize}
+\item If possible, \emph{don't sample at equi-distance spacing!} This is counter-intuitive.
+\item It can be shown that if points are chosen as the Chebyschev nodes $x_k = cos(\frac{2k-1}{2n} \pi), k=1,..n$, then the wild oscillations are less problematic.
+\item Unfortunately, it may not be possible to do such sampling. Oh well.
+\end{itemize}
+\end{frame}
+\begin{frame}
+\frametitle{Lessons Learned}
+\begin{itemize}
+\item Don't use high order polynomials unless you have a really good reason. They oscillate wildly, require solving ill-conditioned systems, and can lie to you, especially around the edges.
+\item In the  same direction, if interpolating, don't assume that throwing more points at the problem will improve it.
+\item Don't assume that equi-distantly spaced nodes is a great idea.
+\item If you know your data is noisy, realllllly re-think polynomial interpolation. 
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Fitting with Lower Order Polynomials}
+\begin{itemize}
+\item Let's say we have 100 data points $(x_i,y_i)$, and we want to try to fit this data. Interpolating with a 100 degree polynomial is computational suicide. Don't.
+\item Try a lower order polynomial and try to `fit' the data.
+\item Python Example!
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Least Squares Methods}
+\begin{itemize}
+\item Our goal is to minimize the error between our fitting function $p(x)$ and the data points $y_i$. We aim to minimize the error $E = \sum_{i=1}^n (y_i - p(x_i) )^2$.
+\item If $p = a_0 + a_1x$, this amounts to minimizing $\sum_{i=1}^n (y_i - a_0 -a_1x_i)^2$.
+\item Use calculus! You can use partial derivatives to actually analytically solve for this solution.
+\item Alternatively, we view it as a linear system of $n$ equations in $2$ unknowns. This gives us a very over-determined system of the form $Ax = b$, where $x$ is the unknown coefficients, and $b$ is the known data, and $A$ is the $N \times 2$ Vandermonde matrix.
+\item Analytically, we solve this by looking at the normal equations by considering $A^TAx = A^tb$. $A^TA$ is an $N \times N$, invertible matrix.
+\end{itemize}
+\end{frame}
+\begin{frame}
+\frametitle{Normal Equations: Playing with Fire}
+\begin{itemize}
+\item Forming the normal equations yields a symmetric, positive definite matrix $A^TA$. Unfortunately, this matrix may be very poorly conditioned. In general, do NOT form this matrix and try solving the system with it.
+\item Instead, consider the system $Ax=b$ and use QR factorization or SVD to solve this system.
+\item Even better, let a numerical linear algebra package solve it for you!
+\begin{itemize}
+\item In Matlab, ,just do $A\backslash b$. Or better yet, use polyfit 
+\item In Python, use numpy, and so np.solve(A,b). Or, better yet, use np.polyfit.
+\item In Armadillo (C++), just do arma::solve(x,A,b).
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Friendly Reminder about Matrix Inverses}
+DO NOT INVERT A MATRIX UNLESS YOU ABSOLUTELY NEED TO!
+
+In general, numerical linear algebra solvers do much smarter things than explicitly forming the matrix $A^{-1}$ and solving by saying $Ax = b $ implies $x = A^{-1}b$. This is very, very inefficient, especially if $A$ is large.
+
+However, contrary to popular belief, there ARE cases where you should invert matrices (such as algorithms that explicitly require them. For example, Kalman filters may call for computing inverses and using them).
+\end{frame}
 \end{document}
 
 \begin{frame}
